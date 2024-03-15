@@ -1,1 +1,1 @@
-# sample-java-app teste
+# sample-java-app
