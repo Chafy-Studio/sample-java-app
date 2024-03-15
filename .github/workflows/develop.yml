@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Validação de commits
+        uses: webiny/action-conventional-commits@v1.3.0
+        with:
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  Optional, for private repositories.
+          allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Set path to maven
@@ -44,11 +49,6 @@ jobs:
     needs: build-app
     
     steps:
-    - name: Validação de commits
-      uses: webiny/action-conventional-commits@v1.3.0
-      with:
-        # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  Optional, for private repositories.
-        allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
     - name: Checkout code
       uses: actions/checkout@v3
     - name:  Download Artifact
