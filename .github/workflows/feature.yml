@@ -1,4 +1,4 @@
-name: Build and Deploy to ECR
+name: Processo de validação de Feature Branch
 
 on:
   push:
@@ -20,6 +20,19 @@ jobs:
           allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Node.js setup 
+        id: nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Semantic release
+        id: semantic-release
+        run: | 
+          VERSION=$(npx semantic-release --dry-run | grep "There is no previous release, the next release version is" | awk '{print $NF}')
+          echo "NEXT_RELEASE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          ls -la
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # - name: Set up JDK 17
       #   uses: actions/setup-java@v3
       #   with:
@@ -46,7 +59,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 head: context.payload.ref,
-                base: "release/1.0.0",
+                base: "release/${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
                 state: 'open',
                 });
                 core.setOutput('open_prs', pullRequests.length > 0);
@@ -62,7 +75,7 @@ jobs:
                   const response_create_ref = await github.rest.git.createRef({
                       owner: context.repo.owner,
                       repo: context.repo.repo,
-                      ref: "refs/heads/release/1.0.0",
+                      ref: "refs/heads/release/${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
                       sha: response.data.commit.sha
                   });
                 } catch (error) {
@@ -71,16 +84,14 @@ jobs:
                   }
                 }
 
-             
-
                 try {
                   const pr_response = await github.rest.pulls.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    title: "Release 1.0.0",
+                    title: "Release ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
                     head:  context.payload.ref,
-                    base: "release/1.0.0",
-                    body: "Release 1.0.0",
+                    base: "release/${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
+                    body: "Release ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
                 });
                 } catch (error) {
                   console.info(error.status); 
@@ -93,16 +104,10 @@ jobs:
                   }
                 }
 
-      - name: Semantic Release
-        id: semantic-release
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          dry_run: true
-          branch: feature/**
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Testando Output
         run: |
           echo "Open PRs: ${{ steps.check-open-prs.outputs.open_prs }}"
-          echo "Version: ${{ steps.semantic-release.outputs.new_release_version }}"
+          echo "Version: ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}"
+          
 

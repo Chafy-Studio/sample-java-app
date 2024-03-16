@@ -17,15 +17,15 @@ jobs:
           allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Semantic Release
-        id: semantic   # Need an `id` for output variables
-        uses: cycjimmy/semantic-release-action@v4
+      - name: Node.js setup 
+        id: nodejs
+        uses: actions/setup-node@v4
         with:
-          dry_run: true
-          branches: pre-release
-          extra_plugins: |
-            @semantic-release/changelog@6.0.0
-
+          node-version: 20
+      - name: Semantic release
+        id: semantic-release
+        run: | 
+          npx semantic-release 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Do something when a new release published
