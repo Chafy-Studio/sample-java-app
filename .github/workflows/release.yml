@@ -3,7 +3,7 @@ name: Build and Deploy to ECR
 on:
   push:
     branches:
-      - release/**
+      - pre-release
 
 jobs:
   build-app:
@@ -26,7 +26,7 @@ jobs:
             [
               'main',
               {
-                name: 'release/**',
+                name: 'pre-release',
                 prerelease: true
               }
             ]
