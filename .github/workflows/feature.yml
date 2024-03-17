@@ -70,9 +70,10 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 head: context.payload.ref,
-                base: "release/${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
-                state: 'open',
+                base: "main",
+                state: 'open'
                 });
+                
                 core.setOutput('open_prs', pullRequests.length > 0);
 
                 
@@ -87,10 +88,10 @@ jobs:
                   const pr_response = await github.rest.pulls.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    title: `From: ${context.payload.ref} - version preview: ${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}`,
+                    title: `From: ${context.payload.ref} - version: ${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}`,
                     head:  context.payload.ref,
                     base:  "main",
-                    body: `Fill this with the description of the PR.`,
+                    body: `Fill this with the description of the PR.`
                 });
                 } catch (error) {
                   console.info(error.status); 
