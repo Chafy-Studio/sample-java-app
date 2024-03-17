@@ -31,6 +31,10 @@ on:
         description: 'AWS Region'
         required: true
         default: 'us-east-1'
+      app_ecr_repository:
+        description: 'ECR Repository'
+        required: true
+        default: '612872581837.dkr.ecr.us-east-1.amazonaws.com'
   push:
     branches:
       - main
@@ -106,15 +110,14 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
     - name: Build and Push Docker image
       run: |
-        aws ecr get-login-password | docker login --username AWS --password-stdin 612872581837.dkr.ecr.us-east-1.amazonaws.com
-        docker build -t 612872581837.dkr.ecr.us-east-1.amazonaws.com/sample-app:$GITHUB_SHA .
-        
-        docker push 612872581837.dkr.ecr.us-east-1.amazonaws.com/sample-app:$GITHUB_SHA
-        docker push 612872581837.dkr.ecr.us-east-1.amazonaws.com/sample-app:${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}
+        aws ecr get-login-password | docker login --username AWS --password-stdin ${{ github.event.inputs.app_ecr_repository }}
+        docker build -t ${{github.event.inputs.app_ecr_repository}}:$GITHUB_SHA .
+        docker push ${{github.event.inputs.app_ecr_repository}}/${{github.event.inputs.app_name}}:$GITHUB_SHA
+        docker push ${{github.event.inputs.app_ecr_repository}}/${{github.event.inputs.app_name}}:${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}
       env:
         AWS_REGION: us-east-1
         IMAGE_TAG: $GITHUB_SHA
     - name: ChangeLog and Tag
       id: close-release
       run: | 
-        npx semantic-release
+        npx semantic-release --extends ./.releaserc.json

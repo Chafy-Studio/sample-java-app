@@ -28,9 +28,11 @@ jobs:
       - name: Semantic release
         id: semantic-release
         run: | 
+          npm init -y 
+          npm install @semantic-release/commit-analyzer @semantic-release/git @semantic-release/release-notes-generator @semantic-release/changelog
           VERSION=$(npx semantic-release --dry-run | grep "There is no previous release, the next release version is" | awk '{print $NF}')
+          echo $VERSION
           echo "NEXT_RELEASE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          ls -la
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up JDK 17
@@ -44,8 +46,6 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/app/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      # - name: Build Maven Java App
-      #   run: ./app/mvnw clean package -f ./app/pom.xml
       - name: Build with Maven
         run: mvn -B package --file ./app/pom.xml
       - name: Teste Coverage
@@ -109,8 +109,5 @@ jobs:
         run: |
           echo "Open PRs: ${{ steps.check-open-prs.outputs.open_prs }}"
           echo "Version: ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}"
-      - name: ChangeLog and Tag
-        id: close-release
-        run: | 
-          npx semantic-release
+
 
