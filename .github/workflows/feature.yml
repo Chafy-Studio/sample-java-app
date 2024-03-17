@@ -46,8 +46,8 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       # - name: Build Maven Java App
       #   run: ./app/mvnw clean package -f ./app/pom.xml
-      # - name: Build with Maven
-      #   run: mvn -B package --file pom.xml
+      - name: Build with Maven
+        run: mvn -B package --file ./app/pom.xml
       - name: Teste Coverage
         run: ./app/mvnw test jacoco:report --file ./app/pom.xml
       - name: Upload coverage to Codecov (optional)
@@ -88,10 +88,10 @@ jobs:
                   const pr_response = await github.rest.pulls.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    title: `New Feature Branch - ${context.payload.ref}`,
+                    title: `From: ${context.payload.ref} - version preview: ${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}`,
                     head:  context.payload.ref,
                     base:  "main",
-                    body: `New Feature Branch - version: ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}`,
+                    body: `Fill this with the description of the PR.`,
                 });
                 } catch (error) {
                   console.info(error.status); 
