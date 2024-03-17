@@ -3,7 +3,7 @@ name: Build and Deploy to ECR
 on:
   push:
     branches:
-      - pre-release
+      - release/*
 
 jobs:
   build-app:
