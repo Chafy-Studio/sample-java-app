@@ -56,7 +56,7 @@ jobs:
             VERSION=$(npx semantic-release --dry-run | grep "There is no previous release, the next release version is" | awk '{print $NF}')
             echo "NEXT_RELEASE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK ${{ github.event.inputs.java_version }}
         uses: actions/setup-java@v3
         with:
@@ -95,7 +95,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download JAR
       uses: actions/download-artifact@v2
       with:

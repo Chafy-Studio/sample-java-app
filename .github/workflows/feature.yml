@@ -19,7 +19,7 @@ jobs:
           # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  Optional, for private repositories.
           allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Node.js setup 
         id: nodejs
         uses: actions/setup-node@v4
