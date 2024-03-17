@@ -1,0 +1,70 @@
+name: 'Java Maven Build'
+description: 'Greet someone'
+inputs:
+  app_base_path:
+    description: 'Application base path'
+    required: true
+    default: './app'
+  os:
+    description: 'Operating System'
+    required: true
+    default: 'ubuntu-latest'
+  gh_token:
+    description: 'GitHub Token'
+    required: true
+  java_dist:
+    description: 'Java Distribution'
+    required: true
+    default: 'adopt'
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: "composite"
+  steps:
+    - name: Validação de commits
+      uses: webiny/action-conventional-commits@v1.3.0
+      with:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}  # Optional, for private repositories.
+        allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
+    - name: Node.js setup 
+      id: nodejs
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Semantic release
+      id: semantic-release
+      shell: bash
+      run: | 
+        npm init -y 
+        npm install @semantic-release/commit-analyzer @semantic-release/git @semantic-release/release-notes-generator @semantic-release/changelog
+        VERSION=$(npx semantic-release --dry-run | grep "There is no previous release, the next release version is" | awk '{print $NF}')
+        echo $VERSION
+        echo "NEXT_RELEASE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: ${{inputs.java_dist}}
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ inputs.os }}-m2-${{ hashFiles('**/**/pom.xml') }}
+        restore-keys: ${{ inputs.os }}-m2
+    - name: Build with Maven
+      shell: bash
+      run: mvn -B package --file ${{inputs.app_base_path}}/pom.xml
+    - name: Teste Coverage
+      shell: bash
+      run: ${{inputs.app_base_path}}/mvnw test jacoco:report --file ${{inputs.app_base_path}}/pom.xml
+    - name: Upload coverage to Codecov (optional)
+      uses: codecov/codecov-action@v3
+      with:
+        file: ${{inputs.app_base_path}}/target/site/jacoco/jacoco.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
