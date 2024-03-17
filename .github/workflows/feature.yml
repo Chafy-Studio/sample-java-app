@@ -70,28 +70,17 @@ jobs:
                     repo: context.repo.repo,
                     branch: "main"
                 });
-                console.log('SHA1', response.data.commit.sha)
-                try { 
-                  const response_create_ref = await github.rest.git.createRef({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      ref: "refs/heads/release/${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
-                      sha: response.data.commit.sha
-                  });
-                } catch (error) {
-                  if(!error.message == 'Message Reference already exists') {
-                    core.setFailed(error.message);
-                  }
-                }
+                console.log('SHA1 Main', response.data.commit.sha)
+                console.log('Context', context);  
 
                 try {
                   const pr_response = await github.rest.pulls.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    title: "Release ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
+                    title: `New Feature Branch - ${context.payload.ref}`,
                     head:  context.payload.ref,
-                    base: "release/${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
-                    body: "Release ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}",
+                    base:  "main",
+                    body: `${context.payload.ref}`,
                 });
                 } catch (error) {
                   console.info(error.status); 
