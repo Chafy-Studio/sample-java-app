@@ -109,5 +109,8 @@ jobs:
         run: |
           echo "Open PRs: ${{ steps.check-open-prs.outputs.open_prs }}"
           echo "Version: ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}"
-          
+      - name: ChangeLog and Tag
+        id: close-release
+        run: | 
+          npx semantic-release
 

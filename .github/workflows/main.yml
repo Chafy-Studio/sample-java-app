@@ -46,6 +46,11 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
+      - name: Semantic release
+        id: semantic-release
+        run: | 
+            VERSION=$(npx semantic-release --dry-run | grep "There is no previous release, the next release version is" | awk '{print $NF}')
+            echo "NEXT_RELEASE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Set up JDK ${{ github.event.inputs.java_version }}
@@ -103,7 +108,13 @@ jobs:
       run: |
         aws ecr get-login-password | docker login --username AWS --password-stdin 612872581837.dkr.ecr.us-east-1.amazonaws.com
         docker build -t 612872581837.dkr.ecr.us-east-1.amazonaws.com/sample-app:$GITHUB_SHA .
+        
         docker push 612872581837.dkr.ecr.us-east-1.amazonaws.com/sample-app:$GITHUB_SHA
+        docker push 612872581837.dkr.ecr.us-east-1.amazonaws.com/sample-app:${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}
       env:
         AWS_REGION: us-east-1
         IMAGE_TAG: $GITHUB_SHA
+    - name: ChangeLog and Tag
+      id: close-release
+      run: | 
+        npx semantic-release
