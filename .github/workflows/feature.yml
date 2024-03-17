@@ -70,7 +70,7 @@ jobs:
                     repo: context.repo.repo,
                     branch: "main"
                 });
-                console.log('SHA1', response.data.commit.sha)
+                console.log('SHA1 Main', response.data.commit.sha)
                 try { 
                   const response_create_ref = await github.rest.git.createRef({
                       owner: context.repo.owner,
