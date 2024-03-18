@@ -24,7 +24,10 @@ jobs:
           app_base_path: './app'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           codecov_token: ${{ secrets.CODECOV_TOKEN }}
-
+      - name: Listagem de arquivos
+        shell: bash
+        run: |
+          ls /tmp -la
       - name: Open PR
         id: check-open-prs
         uses: actions/github-script@v7
