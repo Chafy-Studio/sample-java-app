@@ -50,41 +50,16 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
-      - name: Semantic release
-        id: semantic-release
-        run: | 
-            VERSION=$(npx semantic-release --dry-run | grep "There is no previous release, the next release version is" | awk '{print $NF}')
-            echo "NEXT_RELEASE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Set up JDK ${{ github.event.inputs.java_version }}
-        uses: actions/setup-java@v3
+      - name: Chafy Studio - App Java Maven
+        id: app
+        uses: ./.github/workflows/maven
         with:
-          java-version: ${{ github.event.inputs.java_version }}
-          distribution: ${{ github.event.inputs.java_dist }}
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Build with Maven
-        run: mvn -B package --file ${{github.event.inputs.app_folder}}/pom.xml
-      - name: Teste Coverage
-        run: ./app/mvnw test jacoco:report --file ${{github.event.inputs.app_folder}}/pom.xml
-      - name: Upload coverage to Codecov (optional)
-        uses: codecov/codecov-action@v3
-        with:
-          file: ${{github.event.inputs.app_folder}}/target/site/jacoco/jacoco.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+  
       
-      - name: Upload JAR
-        uses: actions/upload-artifact@v2
-        with:
-          name: app-jar
-          path: ${{github.event.inputs.app_folder}}/target/${{github.event.inputs.app_name}}.jar
 
   image-build-and-deploy:
     runs-on: ubuntu-latest
@@ -99,8 +74,11 @@ jobs:
     - name: Download JAR
       uses: actions/download-artifact@v2
       with:
-        name: app-jar
-        path: target
+        name: artifact-pkg
+        path:  /tmp
+    - name: Listagem de arquivos
+      run: |
+        ls /tmp -la
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
       with: 
