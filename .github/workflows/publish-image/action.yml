@@ -16,7 +16,6 @@ inputs:
   app_name:
     description: 'App Name'
     required: true
-    default: 'app'
   app_version:
     description: 'App Version'
     required: true
@@ -28,7 +27,7 @@ inputs:
 
 runs:
   using: "composite"
-  permission:
+  permissions:
     id-token: write
     contents: write
   steps:

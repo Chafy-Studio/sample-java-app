@@ -29,6 +29,9 @@ jobs:
     - name: Chafy Studio - Publish
       id: publish
       uses: ./.github/workflows/publish-image
+      with:
+        app_name: 'demo'
+        app_version: ${{ steps.app.outputs.version }}
     - name: Listagem de arquivos
       shell: bash
       run: |

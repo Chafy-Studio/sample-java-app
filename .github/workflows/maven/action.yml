@@ -76,7 +76,7 @@ runs:
         token: ${{ inputs.codecov_token }} # required
         fail_ci_if_error: true
     - name: Upload JAR
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: artifact-pkg
         path: ${{inputs.app_base_path}}/target/${{inputs.app_name}}.jar
