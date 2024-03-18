@@ -22,7 +22,7 @@ inputs:
   docker_file:
     description: 'Docker File'
     required: true
-    default: '/infra/Dockerfile'
+    default: './infra/Dockerfile'
   is_release:
     description: 'Is Release'
     required: true
