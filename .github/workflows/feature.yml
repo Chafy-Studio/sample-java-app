@@ -20,7 +20,11 @@ jobs:
         id: app
         uses: ./.github/workflows/maven
         with:
+          app_name: 'demo'
+          app_base_path: './app'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Open PR
         id: check-open-prs
         uses: actions/github-script@v7

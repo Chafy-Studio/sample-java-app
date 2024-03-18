@@ -1,6 +1,9 @@
 name: 'Java Maven Build'
 description: 'Greet someone'
 inputs:
+  app_name:
+    description: 'Application name'
+    required: true
   app_base_path:
     description: 'Application base path'
     required: true
@@ -16,10 +19,13 @@ inputs:
     description: 'Java Distribution'
     required: true
     default: 'adopt'
+  codecov_token:
+    description: 'Codecov Token'
+    required: true
 outputs:
   version:
     description: "The version of the application"
-    value: ${{ steps.sematic-release.outputs.NEXT_RELEASE_VERSION  }}
+    value: ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION  }}
 runs:
   using: "composite"
   steps:
@@ -67,4 +73,10 @@ runs:
         file: ${{inputs.app_base_path}}/target/site/jacoco/jacoco.xml
         flags: unittests
         name: codecov-umbrella
+        token: ${{ inputs.codecov_token }} # required
         fail_ci_if_error: true
+    - name: Upload JAR
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifact-pkg
+        path: ${{inputs.app_base_path}}/target/${{inputs.app_name}}.jar
