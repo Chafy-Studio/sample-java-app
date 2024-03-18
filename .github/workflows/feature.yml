@@ -29,6 +29,13 @@ jobs:
         shell: bash
         run: |
           ls /tmp -la
+      - name: Chafy Studio - Publish
+        id: publish
+        uses: ./.github/workflows/publish-image
+        with:
+          app_ecr_name: 'sample-app'
+          app_version: ${{ steps.app.outputs.version }}
+          is_release: false
       - name: Open PR
         id: check-open-prs
         uses: actions/github-script@v7

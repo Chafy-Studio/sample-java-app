@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copiar o arquivo .jar da sua aplicação Java para dentro do container
 # Substitua `meuapp.jar` pelo nome real do seu arquivo .jar
-COPY ./tmp/demo.jar /app/demo.jar
+COPY ./demo.jar /app/demo.jar
 
 # Comando para executar sua aplicação Java
 # Substitua `meuapp.jar` pelo nome real do seu arquivo .jar, se necessário
