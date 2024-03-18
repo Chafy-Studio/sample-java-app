@@ -26,7 +26,6 @@ jobs:
       with:
         gh_token: ${{ secrets.GITHUB_TOKEN }}
         codecov_token: ${{ secrets.CODECOV_TOKEN }}
-        upload_file: false
     - name: Chafy Studio - Publish
       id: publish
       uses: ./.github/workflows/publish-image

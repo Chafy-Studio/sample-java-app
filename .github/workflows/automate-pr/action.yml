@@ -1,0 +1,8 @@
+name: Automate PR
+description: Automate PR 
+
+# inputs:
+
+# runs:
+#   using: "composite"
+#   steps:

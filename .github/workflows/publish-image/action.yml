@@ -20,10 +20,17 @@ inputs:
   app_version:
     description: 'App Version'
     required: true
+  docker_file:
+    description: 'Docker File'
+    required: true
+    default: '/infra/Dockerfile'
 
 
 runs:
   using: "composite"
+  permission:
+    id-token: write
+    contents: write
   steps:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
@@ -33,9 +40,10 @@ runs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
     - name: Build and Push Docker image
+      shell: bash
       run: |
         aws ecr get-login-password | docker login --username AWS --password-stdin ${{ inputs.app_ecr_repository }}
-        docker build -t ${{inputs.app_ecr_repository}}:$GITHUB_SHA .
+        docker build -t ${{inputs.app_ecr_repository}}:$GITHUB_SHA -f ${{inputs.docker_file}}
         docker push ${{inputs.app_ecr_repository}}/${{inputs.app_name}}:$GITHUB_SHA
         docker push ${{inputs.app_ecr_repository}}/${{inputs.app_name}}:${{inputs.app_version}}
       env:
@@ -43,5 +51,6 @@ runs:
         IMAGE_TAG: $GITHUB_SHA
     - name: ChangeLog and Tag
       id: close-release
+      shell: bash
       run: | 
         npx semantic-release --extends ./.releaserc.json
