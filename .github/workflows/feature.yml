@@ -21,6 +21,8 @@ jobs:
         uses: ./.github/workflows/maven
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Open PR
         id: check-open-prs
         uses: actions/github-script@v7

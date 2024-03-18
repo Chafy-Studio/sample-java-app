@@ -16,10 +16,13 @@ inputs:
     description: 'Java Distribution'
     required: true
     default: 'adopt'
+  codecov_token:
+    description: 'Codecov Token'
+    required: true
 outputs:
   version:
     description: "The version of the application"
-    value: ${{ steps.sematic-release.outputs.NEXT_RELEASE_VERSION  }}
+    value: ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION  }}
 runs:
   using: "composite"
   steps:
@@ -44,6 +47,9 @@ runs:
         echo "NEXT_RELEASE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
+    - name: Echo Teste
+      shell: bash
+      run: echo "${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION  }}"
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -67,4 +73,5 @@ runs:
         file: ${{inputs.app_base_path}}/target/site/jacoco/jacoco.xml
         flags: unittests
         name: codecov-umbrella
+        token: ${{ inputs.codecov_token }} # required
         fail_ci_if_error: true
