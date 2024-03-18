@@ -5,36 +5,6 @@ name: Build and Deploy to ECR
 
 
 on:
-  workflow_dispatch:
-    inputs:
-      java_dist:
-        description: 'Java distribution'
-        required: true
-        default: 'adopt'
-      java_version:
-        description: 'Java version'
-        required: true
-        default: '17'
-      app_folder:
-        description: 'App folder'
-        required: true
-        default: './app'
-      app_name:
-        description: 'App name'
-        required: true
-        default: 'demo'
-      iam_role:
-        description: 'IAM Role'
-        required: true
-        default: 'arn:aws:iam::612872581837:role/gh-actions-role'
-      aws_region:
-        description: 'AWS Region'
-        required: true
-        default: 'us-east-1'
-      app_ecr_repository:
-        description: 'ECR Repository'
-        required: true
-        default: '612872581837.dkr.ecr.us-east-1.amazonaws.com'
   push:
     branches:
       - main
@@ -43,59 +13,24 @@ on:
 jobs:
   build-app:
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Commit lint
-        uses: webiny/action-conventional-commits@v1.3.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          allowed-commit-types: "feat,fix,chore" # Optional, set if you want a subset of commit types to be allowed.
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Chafy Studio - App Java Maven
-        id: app
-        uses: ./.github/workflows/maven
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
-  
-      
-
-  image-build-and-deploy:
-    runs-on: ubuntu-latest
     permissions:
-      id-token: write
-      contents: read
-    needs: build-app
+      contents: write
+      pull-requests: write
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Download JAR
-      uses: actions/download-artifact@v2
+      uses: actions/checkout@v4  
+    - name: Chafy Studio - App Java Maven
+      id: app
+      uses: ./.github/workflows/maven
       with:
-        name: artifact-pkg
-        path:  /tmp
+        gh_token: ${{ secrets.GITHUB_TOKEN }}
+        codecov_token: ${{ secrets.CODECOV_TOKEN }}
+        upload_file: false
+    - name: Chafy Studio - Publish
+      id: publish
+      uses: ./.github/workflows/publish-image
     - name: Listagem de arquivos
+      shell: bash
       run: |
         ls /tmp -la
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
-      with: 
-          role-to-assume: ${{ github.event.inputs.iam_role }}
-          aws-region: ${{ github.event.inputs.aws_region }}
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
-    - name: Build and Push Docker image
-      run: |
-        aws ecr get-login-password | docker login --username AWS --password-stdin ${{ github.event.inputs.app_ecr_repository }}
-        docker build -t ${{github.event.inputs.app_ecr_repository}}:$GITHUB_SHA .
-        docker push ${{github.event.inputs.app_ecr_repository}}/${{github.event.inputs.app_name}}:$GITHUB_SHA
-        docker push ${{github.event.inputs.app_ecr_repository}}/${{github.event.inputs.app_name}}:${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}
-      env:
-        AWS_REGION: us-east-1
-        IMAGE_TAG: $GITHUB_SHA
-    - name: ChangeLog and Tag
-      id: close-release
-      run: | 
-        npx semantic-release --extends ./.releaserc.json
