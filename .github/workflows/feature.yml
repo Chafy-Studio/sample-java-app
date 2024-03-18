@@ -1,14 +1,6 @@
 name: Processo de validação de Feature Branch
 
 on:
-  workflow_dispatch:
-    inputs:
-      java-dist:
-        description: 'Java distribution'
-        required: true
-        default: 'adopt'
-        type: string
-
   push:
     branches:
       - feature/**
@@ -25,7 +17,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Chafy Studio - App Java Maven
-        uses: ./.github/workflows/maven-java
+        id: app
+        uses: ./.github/workflows/maven
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Open PR
@@ -59,7 +52,7 @@ jobs:
                   const pr_response = await github.rest.pulls.create({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
-                    title: `From: ${context.payload.ref} - version: ${{steps.semantic-release.outputs.NEXT_RELEASE_VERSION}}`,
+                    title: `From: ${context.payload.ref} - version: ${{steps.app.outputs.version}}`,
                     head:  context.payload.ref,
                     base:  "main",
                     body: `Fill this with the description of the PR.`
@@ -75,10 +68,5 @@ jobs:
                   }
                 }
 
-
-      - name: Testando Output
-        run: |
-          echo "Open PRs: ${{ steps.check-open-prs.outputs.open_prs }}"
-          echo "Version: ${{ steps.semantic-release.outputs.NEXT_RELEASE_VERSION }}"
 
 

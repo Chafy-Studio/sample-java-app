@@ -16,10 +16,10 @@ inputs:
     description: 'Java Distribution'
     required: true
     default: 'adopt'
-# outputs:
-#   random-number:
-#     description: "Random number"
-#     value: ${{ steps.random-number-generator.outputs.random-number }}
+outputs:
+  version:
+    description: "The version of the application"
+    value: ${{ steps.sematic-release.outputs.NEXT_RELEASE_VERSION  }}
 runs:
   using: "composite"
   steps:
