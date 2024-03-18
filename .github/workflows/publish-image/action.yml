@@ -28,6 +28,9 @@ inputs:
 
 runs:
   using: "composite"
+  permission:
+    id-token: write
+    contents: write
   steps:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
