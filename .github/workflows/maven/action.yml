@@ -45,12 +45,12 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: ${{inputs.java_dist}}
     - name: Cache Maven packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.m2
         key: ${{ inputs.os }}-m2-${{ hashFiles('**/**/pom.xml') }}
@@ -62,7 +62,7 @@ runs:
       shell: bash
       run: ${{inputs.app_base_path}}/mvnw test jacoco:report --file ${{inputs.app_base_path}}/pom.xml
     - name: Upload coverage to Codecov (optional)
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ${{inputs.app_base_path}}/target/site/jacoco/jacoco.xml
         flags: unittests

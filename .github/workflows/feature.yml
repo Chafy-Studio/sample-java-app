@@ -23,7 +23,7 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Open PR
         id: check-open-prs
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
             github-token: ${{ secrets.GITHUB_TOKEN }}
             # Usar Base como parametro calculado
