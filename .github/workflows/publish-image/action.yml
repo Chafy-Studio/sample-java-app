@@ -13,7 +13,7 @@ inputs:
     description: 'AWS Region'
     required: true
     default: 'us-east-1'
-  app_name:
+  app_ecr_name:
     description: 'App Name'
     required: true
   app_version:
@@ -41,13 +41,40 @@ runs:
         aws-region: ${{ inputs.aws_region }}
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
-    - name: Build and Push Docker image
+    - uses: actions/download-artifact@v4
+      with:
+        name: artifact-pkg
+        path: .
+    - name: Teste
       shell: bash
       run: |
+        ls /tmp -la 
+        ls -la
+    - name: Build and Push Docker image
+      if: ${{ inputs.is_release }} == 'false'
+      shell: bash
+      run: |
+        env
+        echo "${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA"
         aws ecr get-login-password | docker login --username AWS --password-stdin ${{ inputs.app_ecr_repository }}
-        docker build -t ${{inputs.app_ecr_repository}}:$GITHUB_SHA -f ${{inputs.docker_file}}
-        docker push ${{inputs.app_ecr_repository}}/${{inputs.app_name}}:$GITHUB_SHA
-        docker push ${{inputs.app_ecr_repository}}/${{inputs.app_name}}:${{inputs.app_version}}
+        docker build -t ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA -f ${{inputs.docker_file}} .
+        docker tag ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:${{inputs.app_version}}-snapshot
+        docker push ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA
+        docker push ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:${{inputs.app_version}}-snapshot
+      env:
+        AWS_REGION: ${{ inputs.aws_region }}
+        IMAGE_TAG: $GITHUB_SHA
+    - name: Build and Push Docker image
+      shell: bash
+      if: ${{ inputs.is_release }} == 'true'
+      run: |
+        echo "ECR - ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA"
+        echo "ECR Version - ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:${{inputs.app_version}}"
+        aws ecr get-login-password | docker login --username AWS --password-stdin ${{ inputs.app_ecr_repository }}
+        docker build -t ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA -f ${{inputs.docker_file}} .
+        docker tag ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:${{inputs.app_version}}
+        docker push ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:$GITHUB_SHA
+        docker push ${{inputs.app_ecr_repository}}/${{inputs.app_ecr_name}}:${{inputs.app_version}}
       env:
         AWS_REGION: ${{ inputs.aws_region }}
         IMAGE_TAG: $GITHUB_SHA
