@@ -25,6 +25,7 @@ inputs:
     default: '/infra/Dockerfile'
 
 
+
 runs:
   using: "composite"
   permissions:
